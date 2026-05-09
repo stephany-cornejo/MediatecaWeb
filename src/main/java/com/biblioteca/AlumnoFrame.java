@@ -1,0 +1,183 @@
+package com.biblioteca;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.sql.*;
+
+public class AlumnoFrame extends JFrame {
+
+    private final int idUsuario;
+    private final GestorPrestamos gestor;
+
+    public AlumnoFrame(int idUsuario, String nombreUsuario) {
+        this.idUsuario = idUsuario;
+        this.gestor    = new GestorPrestamos();
+
+        setTitle("Panel Profesor — " + nombreUsuario);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(920, 580);
+        setLocationRelativeTo(null);
+
+        JPanel panel = AppStyle.buildRootPanel();
+        setContentPane(panel);
+
+        JPanel topPanel = AppStyle.buildSurfacePanel(new BorderLayout());
+        JLabel bienvenida = new JLabel("Bienvenido, " + nombreUsuario + " [PROFESOR]", SwingConstants.CENTER);
+        AppStyle.styleTitle(bienvenida);
+        topPanel.add(bienvenida, BorderLayout.CENTER);
+        panel.add(topPanel, BorderLayout.NORTH);
+
+        // ── Tabla de documentos disponibles ─────────────────────────────
+        String[] columnas = {"ID", "Título", "Tipo", "Disponibles"};
+        Object[][] datos = cargarDocumentos();
+        JTable tablaDocumentos = new JTable(new DefaultTableModel(datos, columnas) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        });
+        tablaDocumentos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        AppStyle.styleTable(tablaDocumentos);
+        JScrollPane scroll = new JScrollPane(tablaDocumentos);
+        AppStyle.styleTitledBorder(scroll, "Selecciona un documento para solicitar prestamo");
+        panel.add(scroll, BorderLayout.CENTER);
+
+        // ── Acciones ─────────────────────────────────────────────────────
+        JPanel acciones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        acciones.setOpaque(true);
+        acciones.setBackground(AppStyle.SURFACE);
+        acciones.setBorder(AppStyle.cardBorder());
+
+        JButton btnSolicitar    = new JButton("Solicitar préstamo");
+        JButton btnMisPrestamos = new JButton("Mis préstamos");
+        JButton btnCerrar       = new JButton("Cerrar sesión");
+        AppStyle.stylePrimaryButton(btnSolicitar);
+        AppStyle.styleSecondaryButton(btnMisPrestamos);
+        AppStyle.styleDangerButton(btnCerrar);
+
+        btnSolicitar.addActionListener(e -> {
+            int fila = tablaDocumentos.getSelectedRow();
+            if (fila < 0) {
+                JOptionPane.showMessageDialog(this, "Selecciona un documento de la tabla primero.");
+                return;
+            }
+            int docId = (int) tablaDocumentos.getValueAt(fila, 0);
+            boolean exito = gestor.realizarPrestamo(idUsuario, docId);
+            if (exito) {
+                JOptionPane.showMessageDialog(this, "Préstamo registrado correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                // Refrescar tabla
+                Object[][] nuevosDatos = cargarDocumentos();
+                tablaDocumentos.setModel(new DefaultTableModel(nuevosDatos, columnas) {
+                    @Override
+                    public boolean isCellEditable(int row, int column) {
+                        return false;
+                    }
+                });
+                tablaDocumentos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                    "No se pudo registrar el préstamo.\n(Verifica tu mora o la disponibilidad del documento.)",
+                    "Préstamo rechazado", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        btnMisPrestamos.addActionListener(e -> mostrarMisPrestamos());
+        btnCerrar.addActionListener(e -> {
+            dispose();
+            new LoginFrame().setVisible(true);
+        });
+
+        acciones.add(btnSolicitar);
+        acciones.add(btnMisPrestamos);
+        acciones.add(btnCerrar);
+        panel.add(acciones, BorderLayout.SOUTH);
+    }
+
+    private Object[][] cargarDocumentos() {
+        String colDisp = columnaDisponibleDocumentos();
+        String sql = "SELECT id, titulo, tipo, " + colDisp + " AS disponibles FROM Documentos ORDER BY tipo, titulo";
+        try {
+            Connection con = ConexionBD.getInstancia().getConexion();
+            try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+                java.util.List<Object[]> filas = new java.util.ArrayList<>();
+                while (rs.next()) {
+                    filas.add(new Object[]{
+                        rs.getInt("id"), rs.getString("titulo"),
+                        rs.getString("tipo"), rs.getInt("disponibles")
+                    });
+                }
+                return filas.toArray(new Object[0][]);
+            }
+        } catch (SQLException e) {
+            return new Object[][]{{"Error", e.getMessage(), "", ""}};
+        }
+    }
+
+    private void mostrarMisPrestamos() {
+        String sql = """
+                SELECT d.titulo, p.fecha_salida,
+                       COALESCE(p.fecha_devolucion, 'Pendiente') AS devolucion,
+                       p.mora_acumulada
+                FROM Prestamos p
+                JOIN Documentos d ON d.id = p.id_documento
+                WHERE p.id_usuario = ?
+                ORDER BY p.fecha_salida DESC
+                """;
+        try {
+            Connection con = ConexionBD.getInstancia().getConexion();
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setInt(1, idUsuario);
+                try (ResultSet rs = ps.executeQuery()) {
+                    String[] cols = {"Documento", "Salida", "Devolución", "Mora ($)"};
+                    java.util.List<Object[]> filas = new java.util.ArrayList<>();
+                    while (rs.next()) {
+                        filas.add(new Object[]{
+                            rs.getString("titulo"), rs.getString("fecha_salida"),
+                            rs.getString("devolucion"), rs.getDouble("mora_acumulada")
+                        });
+                    }
+                    if (filas.isEmpty()) {
+                        JOptionPane.showMessageDialog(this, "No tienes préstamos registrados.");
+                        return;
+                    }
+                    JTable t = new JTable(filas.toArray(new Object[0][]), cols);
+                    t.setEnabled(false);
+                    AppStyle.styleTable(t);
+                    JOptionPane.showMessageDialog(this, new JScrollPane(t), "Mis préstamos", JOptionPane.PLAIN_MESSAGE);
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private String columnaDisponibleDocumentos() {
+        String sql = "PRAGMA table_info(Documentos)";
+        try {
+            Connection con = ConexionBD.getInstancia().getConexion();
+            try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+                boolean tieneStock = false;
+                boolean tieneCantidad = false;
+                while (rs.next()) {
+                    String nombre = rs.getString("name");
+                    if ("stock_disponible".equalsIgnoreCase(nombre)) {
+                        tieneStock = true;
+                    }
+                    if ("cantidad_disponible".equalsIgnoreCase(nombre)) {
+                        tieneCantidad = true;
+                    }
+                }
+                if (tieneStock) {
+                    return "stock_disponible";
+                }
+                if (tieneCantidad) {
+                    return "cantidad_disponible";
+                }
+            }
+        } catch (SQLException ignored) {
+        }
+        return "stock_disponible";
+    }
+}

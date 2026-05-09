@@ -1,0 +1,23 @@
+# IntelliJ
+.idea/
+*.iml
+
+# Eclipse / misc IDE files
+.classpath
+.project
+*.userlibraries
+
+# Build outputs
+target/
+out/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local database and dumps
+*.db
+*.sqlite
