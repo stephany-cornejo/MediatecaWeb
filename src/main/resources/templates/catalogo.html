@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Catálogo - Biblioteca</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8fafc; margin: 0; padding: 0; }
+        .page { max-width: 1120px; margin: 24px auto; padding: 24px; }
+        .header { display:flex; justify-content:space-between; align-items:center; background:#4338ca; color:white; padding:18px; border-radius:16px; }
+        .header a { color:#e0e7ff; text-decoration:none; }
+        .table { width:100%; border-collapse:collapse; margin-top:18px; }
+        .table th, .table td { padding:14px 12px; border-bottom:1px solid #e2e8f0; text-align:left; }
+        .table th { background:#eef2ff; }
+        .alert { padding:14px 16px; border-radius:12px; margin: 16px 0; }
+        .alert-success { background:#dcfce7; color:#166534; }
+        .alert-error { background:#fee2e2; color:#991b1b; }
+        .button { display:inline-block; background:#2563eb; color:white; padding:12px 18px; border-radius:10px; text-decoration:none; }
+        .actions { margin-top: 18px; display:flex; gap: 12px; }
+        form { display:flex; align-items:center; gap:12px; margin-top: 18px; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="header">
+        <div>
+            <h1>Catálogo de documentos</h1>
+            <p th:text="'Usuario: ' + ${username}"></p>
+        </div>
+        <div>
+            <a class="button" th:href="@{/dashboard}">Inicio</a>
+            <a class="button" th:href="@{/prestamos/mios}">Mis préstamos</a>
+        </div>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Tipo</th>
+                <th>Disponibles</th>
+                <th>Total</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="documento : ${documentos}">
+                <td th:text="${documento.id}"></td>
+                <td th:text="${documento.titulo}"></td>
+                <td th:text="${documento.tipo}"></td>
+                <td th:text="${documento.stockDisponible}"></td>
+                <td th:text="${documento.stockTotal}"></td>
+                <td>
+                    <form th:action="@{/prestamos/solicitar}" method="post" th:if="${documento.stockDisponible > 0}">
+                        <input type="hidden" name="documentoId" th:value="${documento.id}" />
+                        <button type="submit">Solicitar</button>
+                    </form>
+                    <span th:if="${documento.stockDisponible == 0}" style="color:#9ca3af;">Sin stock</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Dashboard - Biblioteca</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #eef2ff; margin:0; padding:0; }
+        .page { max-width: 960px; margin: 32px auto; padding: 24px; }
+        .header { display:flex; justify-content:space-between; align-items:center; background:#4338ca; color:white; padding:18px 24px; border-radius:18px; }
+        .header h1 { margin:0; font-size:24px; }
+        .header a { color:#e0e7ff; text-decoration:none; font-weight:600; }
+        .card { background:white; border-radius:18px; padding:24px; margin-top:18px; box-shadow:0 18px 40px rgba(15,23,42,0.08); }
+        .card p { margin: 10px 0; color:#334155; font-size:16px; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="header">
+        <div>
+            <h1>Panel de Biblioteca</h1>
+            <p th:text="'Bienvenido, ' + ${username} + ' (' + ${role} + ')'" style="margin:0; font-size:16px; color:#e2e8f0;"></p>
+        </div>
+        <a th:href="@{/logout}">Cerrar sesión</a>
+    </div>
+
+    <div class="card">
+        <h2>Panel principal</h2>
+        <p>Bienvenido a la versión web de la biblioteca.</p>
+        <div style="margin-top:18px; display:flex; gap:12px; flex-wrap:wrap;">
+            <a th:if="${role} == 'ADMIN'" th:href="@{/admin/usuarios}" style="padding:14px 18px; background:#2563eb; color:white; text-decoration:none; border-radius:12px;">Administrar usuarios</a>
+            <a th:if="${role} == 'ADMIN'" th:href="@{/admin/documentos}" style="padding:14px 18px; background:#2563eb; color:white; text-decoration:none; border-radius:12px;">Administrar documentos</a>
+            <a th:if="${role} == 'ADMIN'" th:href="@{/admin/prestamos}" style="padding:14px 18px; background:#2563eb; color:white; text-decoration:none; border-radius:12px;">Ver préstamos</a>
+            <a th:if="${role} == 'ADMIN'" th:href="@{/admin/configuracion}" style="padding:14px 18px; background:#2563eb; color:white; text-decoration:none; border-radius:12px;">Configuración</a>
+            <a th:if="${role} != 'ADMIN'" th:href="@{/catalogo}" style="padding:14px 18px; background:#2563eb; color:white; text-decoration:none; border-radius:12px;">Ver catálogo</a>
+            <a th:if="${role} != 'ADMIN'" th:href="@{/prestamos/mios}" style="padding:14px 18px; background:#2563eb; color:white; text-decoration:none; border-radius:12px;">Mis préstamos</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

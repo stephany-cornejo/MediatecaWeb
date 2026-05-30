@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Nuevo Documento - Biblioteca</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8fafc; margin: 0; padding: 0; }
+        .page { max-width: 620px; margin: 32px auto; padding: 24px; }
+        .card { background:white; border-radius:18px; padding:28px; box-shadow:0 18px 40px rgba(15,23,42,0.08); }
+        h1 { margin-top:0; }
+        label { display:block; margin-top:18px; color:#334155; }
+        input, select, textarea { width:100%; padding:8px 10px; min-height:40px; box-sizing:border-box; border:1px solid #cbd5e1; border-radius:12px; margin-top:8px; font-size:16px; }
+        textarea { min-height: 120px; }
+        button { margin-top:22px; width:100%; padding:14px; border:none; border-radius:14px; background:#2563eb; color:white; font-size:16px; cursor:pointer; }
+        .alert-error { background:#fee2e2; color:#991b1b; padding:12px 16px; border-radius:12px; margin-top:18px; }
+        .nav { margin-bottom:18px; }
+        .nav a { color:#2563eb; text-decoration:none; margin-right:16px; }
+        .button { display:inline-block; background:#2563eb; color:white; padding:10px 14px; border-radius:12px; text-decoration:none; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="nav">
+        <a class="button" th:href="@{/admin/documentos}">&larr; Volver a documentos</a>
+        <a class="button" th:href="@{/dashboard}">Inicio</a>
+    </div>
+    <div class="card">
+        <h1>Agregar nuevo documento</h1>
+
+        <div th:if="${error}" class="alert-error" th:text="${error}"></div>
+
+        <form th:action="@{/admin/documentos}" method="post">
+            <label for="tipo">Tipo</label>
+            <select id="tipo" name="tipo" required>
+                <option value="LIBRO">LIBRO</option>
+                <option value="REVISTA">REVISTA</option>
+                <option value="CD">CD</option>
+                <option value="TESIS">TESIS</option>
+            </select>
+
+            <label for="titulo">Título</label>
+            <input id="titulo" name="titulo" type="text" required />
+
+            <label for="ubicacion">Ubicación física</label>
+            <input id="ubicacion" name="ubicacion" type="text" required />
+
+            <label for="stockTotal">Cantidad total</label>
+            <input id="stockTotal" name="stockTotal" type="number" min="1" value="1" required />
+
+            <label for="camposEspecificosJson">Campos adicionales (JSON opcional)</label>
+            <textarea id="camposEspecificosJson" name="camposEspecificosJson" placeholder="{&quot;autor&quot;:&quot;Nombre&quot;} "></textarea>
+
+            <button type="submit">Guardar documento</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

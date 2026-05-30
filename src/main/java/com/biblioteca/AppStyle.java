@@ -62,6 +62,8 @@ public final class AppStyle {
 
     public static void styleTextField(JTextField field) {
         field.setFont(FONT_BODY);
+        field.setColumns(18);
+        field.setPreferredSize(new Dimension(220, 32));
         field.setBorder(new CompoundBorder(new LineBorder(new Color(193, 208, 231), 1, true), new EmptyBorder(6, 8, 6, 8)));
     }
 

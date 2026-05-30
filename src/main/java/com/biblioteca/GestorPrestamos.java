@@ -23,7 +23,8 @@ public class GestorPrestamos {
      * @param usuarioId ID del usuario a verificar
      * @return true si el usuario tiene deudas pendientes
      */
-    public boolean verificarMora(int usuarioId) {
+    public boolean verificarMora(int usuarioId, String role) {
+        int diasPermitidos = getDiasPrestamoPorRol(role);
         String sql = """
                 SELECT COUNT(*) AS pendientes
                 FROM Prestamos p
@@ -40,7 +41,7 @@ public class GestorPrestamos {
 
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {
             ps.setInt(1, usuarioId);
-            ps.setInt(2, getConfigInt("dias_prestamo", 7));
+            ps.setInt(2, diasPermitidos);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt("pendientes") > 0;
@@ -56,18 +57,24 @@ public class GestorPrestamos {
      * Registra un préstamo si el usuario no tiene mora y hay ejemplares disponibles.
      *
      * @param usuarioId   ID del usuario que solicita el préstamo
+     * @param role        Rol del usuario (ALUMNO o PROFESOR)
      * @param documentoId ID del documento a prestar
      * @return true si el préstamo se registró correctamente; false en caso contrario
      */
     public boolean realizarPrestamo(int usuarioId, int documentoId) {
+        String role = obtenerRolUsuario(usuarioId);
+        return realizarPrestamo(usuarioId, role, documentoId);
+    }
+
+    public boolean realizarPrestamo(int usuarioId, String role, int documentoId) {
         // 1. Verificar mora del usuario
-        if (verificarMora(usuarioId)) {
+        if (verificarMora(usuarioId, role)) {
             System.out.println("Préstamo rechazado: el usuario " + usuarioId + " tiene mora pendiente.");
             return false;
         }
 
         // 1.1 Verificar cantidad maxima de prestamos activos por usuario
-        int maxPrestamos = getConfigInt("max_prestamos", 3);
+        int maxPrestamos = getMaxPrestamosPorRol(role);
         String sqlActivos = "SELECT COUNT(*) AS activos FROM Prestamos WHERE id_usuario = ? AND fecha_devolucion IS NULL";
         try (PreparedStatement ps = conexion.prepareStatement(sqlActivos)) {
             ps.setInt(1, usuarioId);
@@ -171,8 +178,8 @@ public class GestorPrestamos {
             }
 
             LocalDate hoy = LocalDate.now();
-            int diasPrestamo = getConfigInt("dias_prestamo", 7);
             long diasTranscurridos = ChronoUnit.DAYS.between(fechaSalida, hoy);
+            int diasPrestamo = getDiasPrestamoPorRol(obtenerRolUsuarioPorPrestamo(prestamoId));
             int diasRetraso = (int) Math.max(0, diasTranscurridos - diasPrestamo);
             double tarifaDiaria = getMoraDiaria(hoy.getYear());
             double mora = calcularMora(diasRetraso, tarifaDiaria);
@@ -246,12 +253,65 @@ public class GestorPrestamos {
         }
     }
 
+    public String obtenerRolUsuarioPorPrestamo(int prestamoId) {
+        String sql = "SELECT u.rol FROM Prestamos p JOIN Usuarios u ON u.id = p.id_usuario WHERE p.id = ?";
+        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setInt(1, prestamoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("rol");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al obtener rol de usuario para préstamo " + prestamoId + ": " + e.getMessage(), e);
+        }
+        return "ALUMNO";
+    }
+
+    public String obtenerRolUsuario(int usuarioId) {
+        String sql = "SELECT rol FROM Usuarios WHERE id = ?";
+        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setInt(1, usuarioId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("rol");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al obtener rol de usuario " + usuarioId + ": " + e.getMessage(), e);
+        }
+        return "ALUMNO";
+    }
+
+    public int getMaxPrestamosPorRol(String role) {
+        String clave = "max_prestamos_" + normalizarRol(role).toLowerCase();
+        int defaultValue = "profesor".equalsIgnoreCase(normalizarRol(role)) ? 6 : 3;
+        return getConfigInt(clave, getConfigInt("max_prestamos", defaultValue));
+    }
+
+    public int getDiasPrestamoPorRol(String role) {
+        String clave = "dias_prestamo_" + normalizarRol(role).toLowerCase();
+        int defaultValue = "profesor".equalsIgnoreCase(normalizarRol(role)) ? 14 : 7;
+        return getConfigInt(clave, getConfigInt("dias_prestamo", defaultValue));
+    }
+
+    private String normalizarRol(String role) {
+        if (role == null) {
+            return "alumno";
+        }
+        String normalizado = role.trim().toUpperCase();
+        if ("PROFESOR".equals(normalizado) || "ADMIN".equals(normalizado)) {
+            return "PROFESOR";
+        }
+        return "ALUMNO";
+    }
+
     public double getMoraDiaria(int anio) {
         double porAnio = getConfigDouble("mora_diaria_" + anio, -1);
         if (porAnio >= 0) {
             return porAnio;
         }
-        return getConfigDouble("mora_diaria", 5.0);
+        return getConfigDouble("mora_diaria", 1.0);
     }
 
     /**

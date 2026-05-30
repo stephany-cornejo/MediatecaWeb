@@ -5,6 +5,10 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * Gestiona la conexión JDBC con la base de datos SQLite 'biblioteca.db'.
@@ -29,6 +33,13 @@ public class ConexionBD {
     // Constructor privado: impide instanciación externa
     private ConexionBD() {
         try {
+            // Asegurar que existe la carpeta donde se colocará biblioteca.db
+            String dbDir = System.getProperty("user.home") + File.separator + "biblioteca";
+            try {
+                Files.createDirectories(Paths.get(dbDir));
+            } catch (IOException e) {
+                throw new RuntimeException("No se pudo crear la carpeta para la base de datos: " + e.getMessage(), e);
+            }
             // Registrar el driver explícitamente (necesario en algunas versiones de JDBC)
             Class.forName("org.sqlite.JDBC");
             this.conexion = DriverManager.getConnection(URL);
@@ -106,7 +117,11 @@ public class ConexionBD {
             }
 
             st.executeUpdate("INSERT OR IGNORE INTO Configuracion (clave, valor) VALUES ('max_prestamos', '3')");
+            st.executeUpdate("INSERT OR IGNORE INTO Configuracion (clave, valor) VALUES ('max_prestamos_alumno', '3')");
+            st.executeUpdate("INSERT OR IGNORE INTO Configuracion (clave, valor) VALUES ('max_prestamos_profesor', '6')");
             st.executeUpdate("INSERT OR IGNORE INTO Configuracion (clave, valor) VALUES ('dias_prestamo', '7')");
+            st.executeUpdate("INSERT OR IGNORE INTO Configuracion (clave, valor) VALUES ('dias_prestamo_alumno', '7')");
+            st.executeUpdate("INSERT OR IGNORE INTO Configuracion (clave, valor) VALUES ('dias_prestamo_profesor', '14')");
             st.executeUpdate("INSERT OR IGNORE INTO Configuracion (clave, valor) VALUES ('mora_diaria', '5.0')");
         } catch (SQLException e) {
             throw new RuntimeException("Error al inicializar esquema SQLite: " + e.getMessage(), e);
