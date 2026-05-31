@@ -27,6 +27,20 @@ public class PrestamoService {
         return gestorPrestamos.registrarDevolucion(prestamoId);
     }
 
+    public int contarPrestamosActivos() {
+        String sql = "SELECT COUNT(*) AS total FROM Prestamos WHERE fecha_devolucion IS NULL";
+        Connection connection = ConexionBD.getInstancia().getConexion();
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al contar prestamos activos: " + e.getMessage(), e);
+        }
+        return 0;
+    }
+
     public List<Prestamo> listarPrestamosUsuario(int usuarioId) {
         String sql = "SELECT p.id, p.id_usuario, u.nombre AS usuario, p.id_documento, d.titulo AS documento, p.fecha_salida, COALESCE(p.fecha_devolucion, 'Pendiente') AS fecha_devolucion, COALESCE(p.mora_acumulada, 0) AS mora FROM Prestamos p JOIN Usuarios u ON u.id = p.id_usuario JOIN Documentos d ON d.id = p.id_documento WHERE p.id_usuario = ? ORDER BY p.fecha_salida DESC";
         Connection connection = ConexionBD.getInstancia().getConexion();

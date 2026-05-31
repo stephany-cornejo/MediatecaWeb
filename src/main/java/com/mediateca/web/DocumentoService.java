@@ -98,6 +98,30 @@ public class DocumentoService {
         }
     }
 
+    public int contarPorTipo(String tipo) {
+        String sql = "SELECT COUNT(*) AS total FROM Documentos WHERE tipo = ?";
+        Connection connection = ConexionBD.getInstancia().getConexion();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, tipo);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al contar documentos por tipo: " + e.getMessage(), e);
+        }
+        return 0;
+    }
+
+    public int sumarStockDisponible() {
+        return sumarStock("stock_disponible", "Error al sumar stock disponible: ");
+    }
+
+    public int sumarStockTotal() {
+        return sumarStock("stock_total", "Error al sumar stock total: ");
+    }
+
     public List<Documento> buscarDocumentos(String palabra, String tipo) {
         StringBuilder sql = new StringBuilder("SELECT id, titulo, ubicacion, tipo, stock_disponible, stock_total, COALESCE(campos_especificos_json, '{}') AS campos_especificos_json FROM Documentos WHERE 1=1");
         boolean filtrarTipo = tipo != null && !tipo.isBlank();
@@ -141,5 +165,19 @@ public class DocumentoService {
         } catch (SQLException e) {
             throw new RuntimeException("Error al buscar documentos: " + e.getMessage(), e);
         }
+    }
+
+    private int sumarStock(String columna, String prefijoError) {
+        String sql = "SELECT COALESCE(SUM(" + columna + "), 0) AS total FROM Documentos";
+        Connection connection = ConexionBD.getInstancia().getConexion();
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(prefijoError + e.getMessage(), e);
+        }
+        return 0;
     }
 }

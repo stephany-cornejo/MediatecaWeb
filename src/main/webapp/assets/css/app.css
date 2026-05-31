@@ -8,8 +8,40 @@
     --app-muted: #5c687e;
 }
 
+@font-face {
+    font-family: "Anthropic Sans";
+    src: url("https://cdn.prod.website-files.com/67ce28cfec624e2b733f8a52/69971a00a3295036497e1a28_AnthropicSans-Roman-Web.woff2") format("woff2");
+    font-weight: 100 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Anthropic Sans";
+    src: url("https://cdn.prod.website-files.com/67ce28cfec624e2b733f8a52/69971a016067bf14b9b8f48d_AnthropicSans-Italic-Web.woff2") format("woff2");
+    font-weight: 100 300;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Anthropic Serif";
+    src: url("https://cdn.prod.website-files.com/67ce28cfec624e2b733f8a52/69971a1551eb6cda0d656e8a_AnthropicSerif-Roman-Web.woff2") format("woff2");
+    font-weight: 100 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Anthropic Serif";
+    src: url("https://cdn.prod.website-files.com/67ce28cfec624e2b733f8a52/69971a15a9fb8c1107a3570e_AnthropicSerif-Italic-Web.woff2") format("woff2");
+    font-weight: 100 300;
+    font-style: italic;
+    font-display: swap;
+}
+
 body.app-body {
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: "Anthropic Sans", "Segoe UI", Arial, sans-serif;
     background: linear-gradient(180deg, #f5f8ff 0%, var(--app-bg) 100%);
     color: var(--app-text);
     min-height: 100vh;
@@ -42,6 +74,7 @@ body.app-body {
     font-size: 1.4rem;
     color: var(--app-primary);
     font-weight: 700;
+    font-family: "Anthropic Serif", Georgia, "Times New Roman", serif;
 }
 
 .app-subtitle {
@@ -117,5 +150,167 @@ body.app-body {
     background: var(--app-primary-soft);
     color: var(--app-primary);
     border: 1px solid #cfe0f7;
+}
+
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: stretch;
+}
+
+.dashboard-sidebar {
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: calc(100vh - 4rem);
+    position: sticky;
+    top: 2rem;
+}
+
+.dashboard-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+.dashboard-brand-mark {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--app-primary), #3f79c2);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.dashboard-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dashboard-link {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border-radius: 12px;
+    padding: 0.8rem 0.95rem;
+    text-decoration: none;
+    color: var(--app-primary);
+    background: var(--app-primary-soft);
+    border: 1px solid #d3e2f8;
+    font-weight: 600;
+    transition: all 0.18s ease;
+}
+
+.dashboard-link:hover,
+.dashboard-link.active {
+    color: #fff;
+    background: var(--app-primary);
+    border-color: var(--app-primary);
+}
+
+.dashboard-link-danger {
+    color: #9c2f2f;
+    background: #fbe9e9;
+    border-color: #f0cfcf;
+}
+
+.dashboard-link-danger:hover {
+    background: #c84242;
+    border-color: #c84242;
+    color: #fff;
+}
+
+.dashboard-main {
+    min-width: 0;
+}
+
+.dashboard-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 1rem;
+    align-items: center;
+}
+
+.dashboard-heading {
+    margin: 0;
+    color: var(--app-primary);
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 800;
+    font-family: "Anthropic Serif", Georgia, "Times New Roman", serif;
+}
+
+.dashboard-copy {
+    max-width: 720px;
+    color: var(--app-muted);
+    line-height: 1.65;
+}
+
+.dashboard-highlight {
+    background: linear-gradient(180deg, #f8fbff 0%, #eef4fd 100%);
+}
+
+.dashboard-highlight-number {
+    font-size: 2.35rem;
+    line-height: 1;
+    font-weight: 800;
+    color: var(--app-primary);
+    margin-bottom: 0.35rem;
+}
+
+.dashboard-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.dashboard-kpi-card {
+    min-height: 150px;
+}
+
+.dashboard-kpi-label {
+    color: var(--app-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.82rem;
+    margin-bottom: 0.75rem;
+}
+
+.dashboard-kpi-value {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: var(--app-primary);
+    line-height: 1.1;
+    font-family: "Anthropic Serif", Georgia, "Times New Roman", serif;
+}
+
+@media (max-width: 991.98px) {
+    .dashboard-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-sidebar {
+        min-height: auto;
+        position: static;
+    }
+
+    .dashboard-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .dashboard-kpi-grid {
+        grid-template-columns: 1fr;
+    }
 }
 

@@ -46,6 +46,20 @@ public class UsuarioService {
         }
     }
 
+    public int contarUsuarios() {
+        String sql = "SELECT COUNT(*) AS total FROM Usuarios";
+        Connection connection = ConexionBD.getInstancia().getConexion();
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al contar usuarios: " + e.getMessage(), e);
+        }
+        return 0;
+    }
+
     public boolean actualizarRol(int idUsuario, String rol) {
         String sql = "UPDATE Usuarios SET rol = ? WHERE id = ?";
         Connection connection = ConexionBD.getInstancia().getConexion();
