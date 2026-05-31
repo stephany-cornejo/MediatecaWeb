@@ -5,51 +5,54 @@
 <html>
 <head>
     <title>Consultas</title>
-    <style>
-        html, body {
-            background: #fff !important;
-            filter: none !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        body, body * {
-            filter: none !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 30px auto; }
-        table { border-collapse: collapse; width: 100%; margin-top: 12px; }
-        th, td { border: 1px solid #ccc; padding: 8px; }
-        form input, form select { margin-right: 8px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="${pageContext.request.contextPath}/assets/css/app.css" rel="stylesheet" />
 </head>
-<body>
-<h2>Consulta publica de documentos</h2>
-<p>
-    <a href="${pageContext.request.contextPath}/login">Login</a>
-</p>
+<body class="app-body">
+<div class="app-shell">
+<div class="app-card">
+    <div class="app-card-header">
+        <h2 class="app-title">Consulta publica de documentos</h2>
+        <div class="d-flex gap-2 mt-2 app-nav">
+            <a class="nav-link" href="${pageContext.request.contextPath}/login">Login</a>
+        </div>
+    </div>
+    <div class="app-card-body">
 <%
     String palabra = (String) request.getAttribute("palabra");
     String tipo = (String) request.getAttribute("tipo");
 %>
-<form method="get" action="${pageContext.request.contextPath}/consultas">
-    <input type="text" name="palabra" value="<%= palabra == null ? "" : palabra %>" placeholder="Palabra" />
-    <select name="tipo">
+<form method="get" action="${pageContext.request.contextPath}/consultas" class="row g-2 align-items-end mb-3">
+    <div class="col-md-5">
+        <label class="form-label">Palabra</label>
+        <input class="form-control" type="text" name="palabra" value="<%= palabra == null ? "" : palabra %>" placeholder="Palabra" />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" name="tipo">
         <option value="">Todos</option>
         <option value="LIBRO" <%= "LIBRO".equals(tipo) ? "selected" : "" %>>LIBRO</option>
         <option value="REVISTA" <%= "REVISTA".equals(tipo) ? "selected" : "" %>>REVISTA</option>
         <option value="CD" <%= "CD".equals(tipo) ? "selected" : "" %>>CD</option>
         <option value="TESIS" <%= "TESIS".equals(tipo) ? "selected" : "" %>>TESIS</option>
-    </select>
-    <button type="submit">Buscar</button>
+        </select>
+    </div>
+    <div class="col-md-3 d-grid">
+        <button class="btn btn-app-primary" type="submit">Buscar</button>
+    </div>
 </form>
 <%
     List<DocumentoService.Documento> resultados = (List<DocumentoService.Documento>) request.getAttribute("resultados");
 %>
-<table>
+<div class="app-table-wrap">
+<table class="table table-bordered table-hover app-table">
+    <thead>
     <tr>
         <th>ID</th><th>Titulo</th><th>Tipo</th><th>Ubicacion</th><th>Disponibles</th><th>Total</th>
     </tr>
+    </thead>
+    <tbody>
     <% if (resultados != null) {
         for (DocumentoService.Documento d : resultados) { %>
     <tr>
@@ -62,7 +65,12 @@
     </tr>
     <%  }
       } %>
+    </tbody>
 </table>
+</div>
+    </div>
+</div>
+</div>
 </body>
 </html>
 

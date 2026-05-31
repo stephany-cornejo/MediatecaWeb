@@ -3,57 +3,36 @@
 <html>
 <head>
     <title>Dashboard</title>
-    <style>
-        html, body {
-            background: #fff !important;
-            filter: none !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        body, body * {
-            filter: none !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background: #f4f6f8;
-        }
-        .panel {
-            max-width: 800px;
-            margin: 30px auto;
-            background: #fff;
-            border: 1px solid #dcdcdc;
-            border-radius: 8px;
-            padding: 20px;
-            position: relative;
-        }
-        .menu a {
-            margin-right: 12px;
-            display: inline-block;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="${pageContext.request.contextPath}/assets/css/app.css" rel="stylesheet" />
 </head>
-<body>
-<div class="panel">
+<body class="app-body">
+<div class="app-shell">
 <%
     String username = (String) session.getAttribute("username");
     String role = (String) session.getAttribute("role");
 %>
-<h2>Bienvenido, <%= username %> (<%= role %>)</h2>
-<p class="menu">
-    <a href="${pageContext.request.contextPath}/catalogo">Catalogo</a>
-    <a href="${pageContext.request.contextPath}/prestamos/mios">Mis prestamos</a>
-    <a href="${pageContext.request.contextPath}/consultas">Consulta publica</a>
-    <% if ("ADMIN".equalsIgnoreCase(role)) { %>
-    <a href="${pageContext.request.contextPath}/admin/usuarios">Admin usuarios</a>
-    <a href="${pageContext.request.contextPath}/admin/documentos">Admin documentos</a>
-    <a href="${pageContext.request.contextPath}/admin/prestamos">Admin prestamos</a>
-    <a href="${pageContext.request.contextPath}/admin/config">Configuracion</a>
-    <% } %>
-    <a href="${pageContext.request.contextPath}/logout">Cerrar sesion</a>
-</p>
+    <div class="app-card">
+        <div class="app-card-header">
+            <h2 class="app-title">Bienvenido, <%= username %></h2>
+            <p class="app-subtitle">Perfil activo: <span class="badge badge-soft"><%= role %></span></p>
+        </div>
+        <div class="app-card-body">
+            <div class="d-flex flex-wrap gap-2 app-nav">
+                <a class="nav-link" href="${pageContext.request.contextPath}/catalogo">Catalogo</a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/prestamos/mios">Mis prestamos</a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/consultas">Consulta publica</a>
+                <% if ("ADMIN".equalsIgnoreCase(role)) { %>
+                <a class="nav-link" href="${pageContext.request.contextPath}/admin/usuarios">Admin usuarios</a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/admin/documentos">Admin documentos</a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/admin/prestamos">Admin prestamos</a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/admin/config">Configuracion</a>
+                <% } %>
+                <a class="nav-link" href="${pageContext.request.contextPath}/logout">Cerrar sesion</a>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

@@ -5,40 +5,36 @@
 <html>
 <head>
     <title>Mis Prestamos</title>
-    <style>
-        html, body {
-            background: #fff !important;
-            filter: none !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        body, body * {
-            filter: none !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 30px auto; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="${pageContext.request.contextPath}/assets/css/app.css" rel="stylesheet" />
 </head>
-<body>
-<h2>Mis prestamos</h2>
-<p>
-    <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-    <a href="${pageContext.request.contextPath}/catalogo">Catalogo</a>
-    <% String role = (String) session.getAttribute("role"); if ("ADMIN".equalsIgnoreCase(role)) { %>
-    <a href="${pageContext.request.contextPath}/admin/prestamos">Administrar prestamos</a>
-    <% } %>
-    <a href="${pageContext.request.contextPath}/logout">Cerrar sesion</a>
-</p>
+<body class="app-body">
+<div class="app-shell">
+<div class="app-card">
+    <div class="app-card-header">
+        <h2 class="app-title">Mis prestamos</h2>
+        <div class="d-flex flex-wrap gap-2 mt-2 app-nav">
+            <a class="nav-link" href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
+            <a class="nav-link" href="${pageContext.request.contextPath}/catalogo">Catalogo</a>
+            <% String role = (String) session.getAttribute("role"); if ("ADMIN".equalsIgnoreCase(role)) { %>
+            <a class="nav-link" href="${pageContext.request.contextPath}/admin/prestamos">Administrar prestamos</a>
+            <% } %>
+            <a class="nav-link" href="${pageContext.request.contextPath}/logout">Cerrar sesion</a>
+        </div>
+    </div>
+    <div class="app-card-body">
 <%
     List<PrestamoService.Prestamo> prestamos = (List<PrestamoService.Prestamo>) request.getAttribute("prestamos");
 %>
-<table>
+<div class="app-table-wrap">
+<table class="table table-bordered table-hover app-table">
+    <thead>
     <tr>
         <th>ID</th><th>Documento</th><th>Salida</th><th>Devolucion</th><th>Mora</th>
     </tr>
+    </thead>
+    <tbody>
     <% if (prestamos != null) {
         for (PrestamoService.Prestamo p : prestamos) { %>
     <tr>
@@ -50,7 +46,12 @@
     </tr>
     <%  }
       } %>
+    </tbody>
 </table>
+</div>
+    </div>
+</div>
+</div>
 </body>
 </html>
 

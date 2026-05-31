@@ -5,48 +5,43 @@
 <html>
 <head>
     <title>Catalogo</title>
-    <style>
-        html, body {
-            background: #fff !important;
-            filter: none !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        body, body * {
-            filter: none !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 30px auto; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; }
-        .ok { color: green; }
-        .err { color: #b30000; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="${pageContext.request.contextPath}/assets/css/app.css" rel="stylesheet" />
 </head>
-<body>
-<h2>Catalogo de documentos</h2>
-<p>
-    <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-    <a href="${pageContext.request.contextPath}/prestamos/mios">Mis prestamos</a>
-    <% String role = (String) session.getAttribute("role"); if ("ADMIN".equalsIgnoreCase(role)) { %>
-    <a href="${pageContext.request.contextPath}/admin/documentos">Administrar documentos</a>
-    <% } %>
-    <a href="${pageContext.request.contextPath}/logout">Cerrar sesion</a>
-</p>
+<body class="app-body">
+<div class="app-shell">
+<% String role = (String) session.getAttribute("role"); %>
+<div class="app-card">
+    <div class="app-card-header">
+        <h2 class="app-title">Catalogo de documentos</h2>
+        <div class="d-flex flex-wrap gap-2 mt-2 app-nav">
+            <a class="nav-link" href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
+            <a class="nav-link" href="${pageContext.request.contextPath}/prestamos/mios">Mis prestamos</a>
+            <% if ("ADMIN".equalsIgnoreCase(role)) { %>
+            <a class="nav-link" href="${pageContext.request.contextPath}/admin/documentos">Administrar documentos</a>
+            <% } %>
+            <a class="nav-link" href="${pageContext.request.contextPath}/logout">Cerrar sesion</a>
+        </div>
+    </div>
+    <div class="app-card-body">
 <% String success = (String) request.getAttribute("success"); if (success != null) { %>
-    <div class="ok"><%= success %></div>
+    <div class="alert alert-success" role="alert"><%= success %></div>
 <% } %>
 <% String error = (String) request.getAttribute("error"); if (error != null) { %>
-    <div class="err"><%= error %></div>
+    <div class="alert alert-danger" role="alert"><%= error %></div>
 <% } %>
 <%
     List<DocumentoService.Documento> documentos = (List<DocumentoService.Documento>) request.getAttribute("documentos");
 %>
-<table>
+<div class="app-table-wrap">
+<table class="table table-bordered table-hover app-table">
+    <thead>
     <tr>
         <th>ID</th><th>Titulo</th><th>Tipo</th><th>Disponibles</th><th>Total</th><th>Accion</th>
     </tr>
+    </thead>
+    <tbody>
     <% if (documentos != null) {
         for (DocumentoService.Documento d : documentos) { %>
     <tr>
@@ -59,16 +54,21 @@
             <% if (d.stockDisponible() > 0) { %>
             <form method="post" action="${pageContext.request.contextPath}/prestamos/solicitar">
                 <input type="hidden" name="documentoId" value="<%= d.id() %>" />
-                <button type="submit">Solicitar</button>
+                <button class="btn btn-sm btn-app-primary" type="submit">Solicitar</button>
             </form>
             <% } else { %>
-            Sin stock
+            <span class="badge text-bg-secondary">Sin stock</span>
             <% } %>
         </td>
     </tr>
     <%  }
       } %>
+    </tbody>
 </table>
+</div>
+    </div>
+</div>
+</div>
 </body>
 </html>
 

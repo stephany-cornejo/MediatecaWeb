@@ -3,39 +3,39 @@
 <html>
 <head>
     <title>Login</title>
-    <style>
-        html, body {
-            background: #fff !important;
-            filter: none !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        body, body * {
-            filter: none !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        body { font-family: Arial, sans-serif; max-width: 420px; margin: 40px auto; }
-        input { width: 100%; margin: 8px 0; padding: 8px; }
-        button { padding: 8px 14px; }
-        .error { color: #b30000; margin-top: 10px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="${pageContext.request.contextPath}/assets/css/app.css" rel="stylesheet" />
 </head>
-<body>
-<h2>Mediateca - Login</h2>
-<form method="post" action="${pageContext.request.contextPath}/login">
-    <label>Usuario</label>
-    <input type="text" name="username" required />
+<body class="app-body">
+<div class="app-login-shell">
+    <div class="app-card">
+        <div class="app-card-header">
+            <h2 class="app-title">Mediateca - Login</h2>
+            <p class="app-subtitle">Ingresa tus credenciales para continuar.</p>
+        </div>
+        <div class="app-card-body">
+            <% String error = (String) request.getAttribute("error"); if (error != null) { %>
+            <div class="alert alert-danger" role="alert"><%= error %></div>
+            <% } %>
 
-    <label>Contrasena</label>
-    <input type="password" name="password" required />
-
-    <button type="submit">Ingresar</button>
-</form>
-<p><a href="${pageContext.request.contextPath}/consultas">Consulta publica</a></p>
-<% String error = (String) request.getAttribute("error"); if (error != null) { %>
-    <div class="error"><%= error %></div>
-<% } %>
+            <form method="post" action="${pageContext.request.contextPath}/login" class="vstack gap-3">
+                <div>
+                    <label class="form-label">Usuario</label>
+                    <input class="form-control" type="text" name="username" required />
+                </div>
+                <div>
+                    <label class="form-label">Contrasena</label>
+                    <input class="form-control" type="password" name="password" required />
+                </div>
+                <button class="btn btn-app-primary w-100" type="submit">Ingresar</button>
+            </form>
+            <div class="mt-3 text-center">
+                <a href="${pageContext.request.contextPath}/consultas">Consulta publica</a>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
 
