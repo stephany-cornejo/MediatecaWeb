@@ -45,4 +45,54 @@ public class UsuarioService {
             return false;
         }
     }
+
+    public boolean actualizarRol(int idUsuario, String rol) {
+        String sql = "UPDATE Usuarios SET rol = ? WHERE id = ?";
+        Connection connection = ConexionBD.getInstancia().getConexion();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, rol);
+            ps.setInt(2, idUsuario);
+            return ps.executeUpdate() == 1;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public boolean restablecerPassword(int idUsuario, String nuevaPassword) {
+        String sql = "UPDATE Usuarios SET password = ? WHERE id = ?";
+        Connection connection = ConexionBD.getInstancia().getConexion();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, PasswordUtils.sha256(nuevaPassword));
+            ps.setInt(2, idUsuario);
+            return ps.executeUpdate() == 1;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public boolean eliminarUsuario(int idUsuario) {
+        String sql = "DELETE FROM Usuarios WHERE id = ?";
+        Connection connection = ConexionBD.getInstancia().getConexion();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            return ps.executeUpdate() == 1;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public String obtenerRolUsuario(int idUsuario) {
+        String sql = "SELECT rol FROM Usuarios WHERE id = ?";
+        Connection connection = ConexionBD.getInstancia().getConexion();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("rol");
+                }
+            }
+        } catch (SQLException ignored) {
+        }
+        return "ALUMNO";
+    }
 }

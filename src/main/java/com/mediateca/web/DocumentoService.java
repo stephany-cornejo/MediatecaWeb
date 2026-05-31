@@ -69,6 +69,35 @@ public class DocumentoService {
         }
     }
 
+    public boolean actualizarDocumento(int id, String tipo, String titulo, String ubicacion,
+                                      int stockDisponible, int stockTotal, String camposEspecificosJson) {
+        String sql = "UPDATE Documentos SET titulo = ?, ubicacion = ?, tipo = ?, stock_disponible = ?, stock_total = ?, campos_especificos_json = ? WHERE id = ?";
+        Connection connection = ConexionBD.getInstancia().getConexion();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, titulo);
+            ps.setString(2, ubicacion);
+            ps.setString(3, tipo);
+            ps.setInt(4, stockDisponible);
+            ps.setInt(5, stockTotal);
+            ps.setString(6, camposEspecificosJson == null || camposEspecificosJson.isBlank() ? "{}" : camposEspecificosJson);
+            ps.setInt(7, id);
+            return ps.executeUpdate() == 1;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public boolean eliminarDocumento(int id) {
+        String sql = "DELETE FROM Documentos WHERE id = ?";
+        Connection connection = ConexionBD.getInstancia().getConexion();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() == 1;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
     public List<Documento> buscarDocumentos(String palabra, String tipo) {
         StringBuilder sql = new StringBuilder("SELECT id, titulo, ubicacion, tipo, stock_disponible, stock_total, COALESCE(campos_especificos_json, '{}') AS campos_especificos_json FROM Documentos WHERE 1=1");
         boolean filtrarTipo = tipo != null && !tipo.isBlank();

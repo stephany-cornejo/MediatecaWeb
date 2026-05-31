@@ -46,6 +46,12 @@
     <a href="${pageContext.request.contextPath}/catalogo">Catalogo</a>
     <a href="${pageContext.request.contextPath}/prestamos/mios">Mis prestamos</a>
     <a href="${pageContext.request.contextPath}/consultas">Consulta publica</a>
+    <% if ("ADMIN".equalsIgnoreCase(role)) { %>
+    <a href="${pageContext.request.contextPath}/admin/usuarios">Admin usuarios</a>
+    <a href="${pageContext.request.contextPath}/admin/documentos">Admin documentos</a>
+    <a href="${pageContext.request.contextPath}/admin/prestamos">Admin prestamos</a>
+    <a href="${pageContext.request.contextPath}/admin/config">Configuracion</a>
+    <% } %>
     <a href="${pageContext.request.contextPath}/logout">Cerrar sesion</a>
 </p>
 </div>

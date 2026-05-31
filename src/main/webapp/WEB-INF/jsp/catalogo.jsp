@@ -29,6 +29,9 @@
 <p>
     <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
     <a href="${pageContext.request.contextPath}/prestamos/mios">Mis prestamos</a>
+    <% String role = (String) session.getAttribute("role"); if ("ADMIN".equalsIgnoreCase(role)) { %>
+    <a href="${pageContext.request.contextPath}/admin/documentos">Administrar documentos</a>
+    <% } %>
     <a href="${pageContext.request.contextPath}/logout">Cerrar sesion</a>
 </p>
 <% String success = (String) request.getAttribute("success"); if (success != null) { %>
