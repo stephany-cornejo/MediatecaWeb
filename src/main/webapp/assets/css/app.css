@@ -1,0 +1,121 @@
+:root {
+    --app-primary: #1a4d8c;
+    --app-primary-soft: #e8f0fb;
+    --app-bg: #eef3fc;
+    --app-surface: #ffffff;
+    --app-border: #d6e0ef;
+    --app-text: #1b2534;
+    --app-muted: #5c687e;
+}
+
+body.app-body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(180deg, #f5f8ff 0%, var(--app-bg) 100%);
+    color: var(--app-text);
+    min-height: 100vh;
+}
+
+.app-shell {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 0.75rem;
+}
+
+.app-card {
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(26, 77, 140, 0.08);
+}
+
+.app-card-header {
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid var(--app-border);
+}
+
+.app-card-body {
+    padding: 1.2rem;
+}
+
+.app-title {
+    margin: 0;
+    font-size: 1.4rem;
+    color: var(--app-primary);
+    font-weight: 700;
+}
+
+.app-subtitle {
+    margin: 0.25rem 0 0;
+    color: var(--app-muted);
+}
+
+.app-nav .nav-link {
+    border-radius: 999px;
+    padding: 0.35rem 0.8rem;
+    color: var(--app-primary);
+    background: var(--app-primary-soft);
+    border: 1px solid #d3e2f8;
+    font-size: 0.9rem;
+}
+
+.app-nav .nav-link:hover {
+    background: #dce9fb;
+    color: #123e75;
+}
+
+.app-table-wrap {
+    overflow-x: auto;
+}
+
+.app-table {
+    width: 100%;
+    border-color: #dce5f2;
+}
+
+.app-table thead th {
+    background: #edf3fd;
+    color: #2b4f83;
+    white-space: nowrap;
+}
+
+.app-table td,
+.app-table th {
+    vertical-align: middle;
+    font-size: 0.92rem;
+}
+
+.app-login-shell {
+    max-width: 460px;
+    margin: 4rem auto;
+    padding: 0 0.75rem;
+}
+
+.form-control,
+.form-select {
+    border-color: #c8d7eb;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #7ea8de;
+    box-shadow: 0 0 0 0.2rem rgba(26, 77, 140, 0.14);
+}
+
+.btn-app-primary {
+    background-color: var(--app-primary);
+    border-color: #18457d;
+    color: #fff;
+}
+
+.btn-app-primary:hover {
+    background-color: #154175;
+    border-color: #123965;
+    color: #fff;
+}
+
+.badge-soft {
+    background: var(--app-primary-soft);
+    color: var(--app-primary);
+    border: 1px solid #cfe0f7;
+}
+
