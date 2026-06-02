@@ -15,8 +15,8 @@ public class UsuarioService {
 
     public List<Usuario> listarUsuarios() {
         String sql = "SELECT id, nombre, rol, COALESCE(mora_acumulada, 0) AS mora FROM Usuarios ORDER BY rol, nombre";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql);
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             List<Usuario> usuarios = new ArrayList<>();
             while (rs.next()) {
@@ -35,8 +35,8 @@ public class UsuarioService {
 
     public boolean crearUsuario(String nombre, String password, String rol) {
         String sql = "INSERT INTO Usuarios (nombre, password, rol, mora_acumulada) VALUES (?, ?, ?, 0)";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, nombre);
             ps.setString(2, PasswordUtils.sha256(password));
             ps.setString(3, rol);
@@ -48,8 +48,8 @@ public class UsuarioService {
 
     public int contarUsuarios() {
         String sql = "SELECT COUNT(*) AS total FROM Usuarios";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql);
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt("total");
@@ -62,8 +62,8 @@ public class UsuarioService {
 
     public boolean actualizarRol(int idUsuario, String rol) {
         String sql = "UPDATE Usuarios SET rol = ? WHERE id = ?";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, rol);
             ps.setInt(2, idUsuario);
             return ps.executeUpdate() == 1;
@@ -74,8 +74,8 @@ public class UsuarioService {
 
     public boolean restablecerPassword(int idUsuario, String nuevaPassword) {
         String sql = "UPDATE Usuarios SET password = ? WHERE id = ?";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, PasswordUtils.sha256(nuevaPassword));
             ps.setInt(2, idUsuario);
             return ps.executeUpdate() == 1;
@@ -86,8 +86,8 @@ public class UsuarioService {
 
     public boolean eliminarUsuario(int idUsuario) {
         String sql = "DELETE FROM Usuarios WHERE id = ?";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, idUsuario);
             return ps.executeUpdate() == 1;
         } catch (SQLException e) {
@@ -97,8 +97,8 @@ public class UsuarioService {
 
     public String obtenerRolUsuario(int idUsuario) {
         String sql = "SELECT rol FROM Usuarios WHERE id = ?";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, idUsuario);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

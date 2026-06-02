@@ -31,8 +31,8 @@ public class DocumentoService {
 
     public List<Documento> listarDocumentos() {
         String sql = "SELECT id, titulo, ubicacion, tipo, stock_disponible, stock_total, COALESCE(campos_especificos_json, '{}') AS campos_especificos_json FROM Documentos ORDER BY tipo, titulo";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql);
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             List<Documento> documentos = new ArrayList<>();
             while (rs.next()) {
@@ -55,8 +55,8 @@ public class DocumentoService {
     public boolean crearDocumento(String tipo, String titulo, String ubicacion,
                                   int stockTotal, String camposEspecificosJson) {
         String sql = "INSERT INTO Documentos (titulo, ubicacion, tipo, stock_total, stock_disponible, campos_especificos_json) VALUES (?, ?, ?, ?, ?, ?)";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, titulo);
             ps.setString(2, ubicacion);
             ps.setString(3, tipo);
@@ -70,10 +70,10 @@ public class DocumentoService {
     }
 
     public boolean actualizarDocumento(int id, String tipo, String titulo, String ubicacion,
-                                      int stockDisponible, int stockTotal, String camposEspecificosJson) {
+                                       int stockDisponible, int stockTotal, String camposEspecificosJson) {
         String sql = "UPDATE Documentos SET titulo = ?, ubicacion = ?, tipo = ?, stock_disponible = ?, stock_total = ?, campos_especificos_json = ? WHERE id = ?";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, titulo);
             ps.setString(2, ubicacion);
             ps.setString(3, tipo);
@@ -89,8 +89,8 @@ public class DocumentoService {
 
     public boolean eliminarDocumento(int id) {
         String sql = "DELETE FROM Documentos WHERE id = ?";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() == 1;
         } catch (SQLException e) {
@@ -100,8 +100,8 @@ public class DocumentoService {
 
     public int contarPorTipo(String tipo) {
         String sql = "SELECT COUNT(*) AS total FROM Documentos WHERE tipo = ?";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, tipo);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -135,8 +135,8 @@ public class DocumentoService {
         }
         sql.append(" ORDER BY tipo, titulo");
 
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql.toString())) {
             int index = 1;
             if (filtrarTipo) {
                 ps.setString(index++, tipo);
@@ -169,8 +169,8 @@ public class DocumentoService {
 
     private int sumarStock(String columna, String prefijoError) {
         String sql = "SELECT COALESCE(SUM(" + columna + "), 0) AS total FROM Documentos";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql);
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt("total");

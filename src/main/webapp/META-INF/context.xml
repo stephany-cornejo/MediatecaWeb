@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <Resource
+        name="jdbc/MediatecaDS"
+        auth="Container"
+        type="javax.sql.DataSource"
+        driverClassName="org.sqlite.JDBC"
+        url="jdbc:sqlite:${catalina.base}/mediateca"
+        factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+        maxActive="20"
+        maxIdle="10"
+        minIdle="2"
+        initialSize="2"
+        maxWait="10000"
+        validationQuery="SELECT 1"
+        testOnBorrow="true"
+        testWhileIdle="true"
+        timeBetweenEvictionRunsMillis="30000"
+        removeAbandoned="true"
+        removeAbandonedTimeout="60"
+        logAbandoned="true"/>
+</Context>
+

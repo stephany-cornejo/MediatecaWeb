@@ -16,8 +16,8 @@ public class LoginService {
     public Usuario autenticar(String nombre, String password) {
         String sql = "SELECT id, nombre, rol, password FROM Usuarios WHERE nombre = ?";
 
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, nombre);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

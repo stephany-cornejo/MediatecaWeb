@@ -2,10 +2,15 @@ package com.mediateca;
 
 import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
+import org.sqlite.SQLiteDataSource;
 
 /**
  * Gestiona la conexión JDBC con la base de datos SQLite 'mediateca'
@@ -13,11 +18,13 @@ import java.sql.Statement;
  */
 public class ConexionBD {
 
+    private static final String JNDI_NAME = "java:comp/env/jdbc/MediatecaDS";
     private static final String DB_PATH = resolverRutaBaseDatos();
     private static final String URL = "jdbc:sqlite:" + DB_PATH.replace("\\", "/");
 
     private static ConexionBD instancia;
-    private Connection conexion;
+    private final DataSource dataSource;
+    private volatile boolean esquemaInicializado;
 
     private static String resolverRutaBaseDatos() {
         String rutaConfigurada = System.getProperty("mediateca.db.path");
@@ -73,21 +80,46 @@ public class ConexionBD {
         try {
             // Registrar el driver explícitamente (necesario en algunas versiones de JDBC)
             Class.forName("org.sqlite.JDBC");
-            this.conexion = DriverManager.getConnection(URL);
-            // Activar claves foráneas (desactivadas por defecto en SQLite)
-            this.conexion.createStatement().execute("PRAGMA foreign_keys = ON;");
-            inicializarEsquema();
-            System.out.println("Conexión establecida con mediateca en: " + DB_PATH);
+            this.dataSource = resolverDataSource();
+            inicializarEsquemaSiEsNecesario();
+            System.out.println("DataSource inicializado para mediateca en: " + DB_PATH);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(
                 "Driver SQLite no encontrado. Verifica que sqlite-jdbc esté en el classpath.", e);
-        } catch (SQLException e) {
+        } catch (NamingException | SQLException e) {
             throw new RuntimeException(
                 "Error al conectar con la base de datos: " + e.getMessage(), e);
         }
     }
 
-    private void inicializarEsquema() {
+    private DataSource resolverDataSource() throws NamingException {
+        try {
+            return (DataSource) new InitialContext().lookup(JNDI_NAME);
+        } catch (NamingException e) {
+            SQLiteDataSource fallback = new SQLiteDataSource();
+            fallback.setUrl(URL);
+            return fallback;
+        }
+    }
+
+    private void inicializarEsquemaSiEsNecesario() throws SQLException {
+        if (esquemaInicializado) {
+            return;
+        }
+        synchronized (this) {
+            if (esquemaInicializado) {
+                return;
+            }
+            try (Connection conexion = dataSource.getConnection();
+                 Statement pragma = conexion.createStatement()) {
+                pragma.execute("PRAGMA foreign_keys = ON;");
+                inicializarEsquema(conexion);
+            }
+            esquemaInicializado = true;
+        }
+    }
+
+    private void inicializarEsquema(Connection conexion) {
         try (Statement st = conexion.createStatement()) {
             st.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS Usuarios (
@@ -131,19 +163,21 @@ public class ConexionBD {
                 )
                 """);
 
-            if (!existeColumna("Usuarios", "mora_acumulada")) {
+            if (!existeColumna(conexion, "Usuarios", "mora_acumulada")) {
                 st.executeUpdate("ALTER TABLE Usuarios ADD COLUMN mora_acumulada REAL DEFAULT 0");
             }
 
-            if (!existeColumna("Documentos", "stock_total") && existeColumna("Documentos", "cantidad_total")) {
+            if (!existeColumna(conexion, "Documentos", "stock_total")
+                && existeColumna(conexion, "Documentos", "cantidad_total")) {
                 st.executeUpdate("ALTER TABLE Documentos ADD COLUMN stock_total INTEGER DEFAULT 0");
                 st.executeUpdate("UPDATE Documentos SET stock_total = cantidad_total");
             }
-            if (!existeColumna("Documentos", "stock_disponible") && existeColumna("Documentos", "cantidad_disponible")) {
+            if (!existeColumna(conexion, "Documentos", "stock_disponible")
+                && existeColumna(conexion, "Documentos", "cantidad_disponible")) {
                 st.executeUpdate("ALTER TABLE Documentos ADD COLUMN stock_disponible INTEGER DEFAULT 0");
                 st.executeUpdate("UPDATE Documentos SET stock_disponible = cantidad_disponible");
             }
-            if (!existeColumna("Documentos", "campos_especificos_json")) {
+            if (!existeColumna(conexion, "Documentos", "campos_especificos_json")) {
                 st.executeUpdate("ALTER TABLE Documentos ADD COLUMN campos_especificos_json TEXT DEFAULT '{}'");
             }
 
@@ -159,7 +193,7 @@ public class ConexionBD {
         }
     }
 
-    private boolean existeColumna(String tabla, String columna) throws SQLException {
+    private boolean existeColumna(Connection conexion, String tabla, String columna) throws SQLException {
         try (Statement st = conexion.createStatement();
              ResultSet rs = st.executeQuery("PRAGMA table_info(" + tabla + ")")) {
             while (rs.next()) {
@@ -178,7 +212,7 @@ public class ConexionBD {
      * @return instancia de ConexionBD
      */
     public static ConexionBD getInstancia() {
-        if (instancia == null || !instancia.isConectado()) {
+        if (instancia == null) {
             instancia = new ConexionBD();
         }
         return instancia;
@@ -190,7 +224,16 @@ public class ConexionBD {
      * @return conexión activa con la base de datos
      */
     public Connection getConexion() {
-        return conexion;
+        try {
+            Connection conexion = dataSource.getConnection();
+            try (Statement pragma = conexion.createStatement()) {
+                pragma.execute("PRAGMA foreign_keys = ON;");
+            }
+            inicializarEsquemaSiEsNecesario();
+            return conexion;
+        } catch (SQLException e) {
+            throw new RuntimeException("No se pudo obtener una conexión desde el pool: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -199,8 +242,8 @@ public class ConexionBD {
      * @return {@code true} si la conexión está activa
      */
     public boolean isConectado() {
-        try {
-            return conexion != null && !conexion.isClosed() && conexion.isValid(2);
+        try (Connection conexion = dataSource.getConnection()) {
+            return conexion.isValid(2);
         } catch (SQLException e) {
             return false;
         }
@@ -211,15 +254,8 @@ public class ConexionBD {
      * Debe llamarse al finalizar la aplicación.
      */
     public void cerrarConexion() {
-        if (isConectado()) {
-            try {
-                conexion.close();
-                instancia = null;
-                System.out.println("Conexión cerrada correctamente.");
-            } catch (SQLException e) {
-                System.err.println("Error al cerrar la conexión: " + e.getMessage());
-            }
-        }
+        // El ciclo de vida del pool/JNDI lo administra Tomcat.
+        instancia = null;
     }
 
     // ------------------------------------------------------------------
@@ -228,9 +264,12 @@ public class ConexionBD {
     public static void main(String[] args) {
         ConexionBD bd = ConexionBD.getInstancia();
 
-        if (bd.isConectado()) {
-            System.out.println("Base de datos lista.");
-            // Ejemplo: bd.getConexion().prepareStatement("SELECT * FROM Usuarios");
+        try (Connection conexion = bd.getConexion()) {
+            if (conexion.isValid(2)) {
+                System.out.println("Base de datos lista.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
         bd.cerrarConexion();

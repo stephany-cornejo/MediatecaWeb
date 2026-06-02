@@ -13,8 +13,8 @@ public class ConfigService {
 
     public Map<String, String> listarConfiguracion() {
         String sql = "SELECT clave, valor FROM Configuracion ORDER BY clave";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql);
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             Map<String, String> configuracion = new LinkedHashMap<>();
             while (rs.next()) {
@@ -28,8 +28,8 @@ public class ConfigService {
 
     public int getInt(String clave, int defaultValue) {
         String sql = "SELECT valor FROM Configuracion WHERE clave = ?";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, clave);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -43,8 +43,8 @@ public class ConfigService {
 
     public double getDouble(String clave, double defaultValue) {
         String sql = "SELECT valor FROM Configuracion WHERE clave = ?";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, clave);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -58,8 +58,8 @@ public class ConfigService {
 
     public void setConfig(String clave, String valor) {
         String sql = "INSERT INTO Configuracion (clave, valor) VALUES (?, ?) ON CONFLICT(clave) DO UPDATE SET valor = excluded.valor";
-        Connection connection = ConexionBD.getInstancia().getConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = ConexionBD.getInstancia().getConexion();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, clave);
             ps.setString(2, valor);
             ps.executeUpdate();
